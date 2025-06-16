@@ -1,8 +1,8 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
+import { useState, type FC } from "react";
+import reactLogo from '@/shared/assets/react.svg'
 import viteLogo from '/vite.svg'
 
-function App() {
+const HomePage: FC = () => {
     const [count, setCount] = useState(0)
     const [darkMode, setDarkMode] = useState(false)
 
@@ -174,7 +174,7 @@ function App() {
                 </footer>
             </main>
         </div>
-    )
-}
+    );
+};
 
-export default App
+export default HomePage;
