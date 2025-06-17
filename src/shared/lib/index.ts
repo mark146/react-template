@@ -1,1 +1,1 @@
-export { compose } from "./functional";
+export { compose } from "./compose";

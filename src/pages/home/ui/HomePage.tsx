@@ -1,15 +1,55 @@
 import { useState, type FC } from "react";
 import reactLogo from '@/shared/assets/react.svg'
 import viteLogo from '/vite.svg'
+import { useErrorToast } from "@/shared/ui";
 
 const HomePage: FC = () => {
-    const [count, setCount] = useState(0)
-    const [darkMode, setDarkMode] = useState(false)
+    const [count, setCount] = useState(0);
+    const [darkMode, setDarkMode] = useState(false);
+    const { showError } = useErrorToast();
 
     const toggleDarkMode = () => {
-        setDarkMode(!darkMode)
-        document.documentElement.classList.toggle('dark')
-    }
+        try {
+            setDarkMode(!darkMode);
+            document.documentElement.classList.toggle('dark');
+        } catch (error) {
+            showError('다크모드 전환 중 오류가 발생했습니다.');
+            console.error('Dark mode toggle error:', error);
+        }
+    };
+
+    const incrementCount = () => {
+        try {
+            if (count >= 10) {
+                throw new Error('카운터가 최대값(999)에 도달했습니다.');
+            }
+            setCount(count + 1);
+        } catch (error) {
+            console.log("message: ", (error as Error).message)
+            showError((error as Error).message);
+        }
+    };
+
+    const decrementCount = () => {
+        try {
+            if (count <= 0) {
+                throw new Error('카운터가 최소값(0)에 도달했습니다.');
+            }
+            setCount(count - 1);
+        } catch (error) {
+            showError((error as Error).message);
+            console.log("message: ", (error as Error).message)
+        }
+    };
+
+    const resetCount = () => {
+        try {
+            setCount(0);
+        } catch (error) {
+            showError('카운터 리셋 중 오류가 발생했습니다.');
+            console.error('Reset count error:', error);
+        }
+    };
 
     return (
         <div className={`min-h-screen transition-colors duration-300 ${
@@ -100,20 +140,20 @@ const HomePage: FC = () => {
 
                             <div className="flex justify-center gap-4 mb-6">
                                 <button
-                                    onClick={() => setCount(count - 1)}
+                                    onClick={decrementCount}
                                     className="btn bg-red-500 hover:bg-red-600 text-white focus:ring-red-500"
                                     disabled={count <= 0}
                                 >
                                     감소 -
                                 </button>
                                 <button
-                                    onClick={() => setCount(count + 1)}
+                                    onClick={incrementCount}
                                     className="btn-primary"
                                 >
                                     증가 +
                                 </button>
                                 <button
-                                    onClick={() => setCount(0)}
+                                    onClick={resetCount}
                                     className="btn btn-secondary"
                                 >
                                     리셋
@@ -131,7 +171,6 @@ const HomePage: FC = () => {
                     </div>
                 </section>
 
-                {/* Footer Info */}
                 <footer className="text-center mt-16">
                     <p className={`text-sm ${
                         darkMode ? 'text-gray-400' : 'text-gray-500'
