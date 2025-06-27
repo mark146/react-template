@@ -6,27 +6,65 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "preview": "vite preview",
+
     "lint": "eslint .",
-    "preview": "vite preview"
+    "lint:fix": "eslint . --fix",
+    "lint:check": "eslint . --max-warnings 0",
+    "lint:cache": "eslint . --cache",
+    "lint:src": "eslint src/",
+    "lint:src:fix": "eslint src/ --fix",
+    "lint:config": "eslint *.config.js tools/ scripts/",
+    "lint:config:fix": "eslint *.config.js tools/ scripts/ --fix",
+
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage",
+
+    "test:rules": "node tools/eslint/tests/rules-test.js",
+    "test:rules:watch": "nodemon tools/eslint/tests/rules-test.js",
+    "test:rules:vitest": "vitest run tools/eslint/tests/",
+    "test:rules:vitest:watch": "vitest tools/eslint/tests/",
+
+    "type-check": "tsc --noEmit",
+    "type-check:watch": "tsc --noEmit --watch",
+
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+
+    "clean": "rm -rf dist/ node_modules/.cache/ .eslintcache",
+    "clean:deps": "rm -rf node_modules package-lock.json",
+
+    "validate": "npm run type-check && npm run lint:check && npm run test:rules",
+    "prepare": "npm run type-check && npm run lint:check",
+
+    "eslint:version": "npx eslint --version",
+    "eslint:debug": "eslint --print-config src/App.tsx",
+    "eslint:inspect": "eslint --inspect-config"
   },
   "dependencies": {
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "react-router-dom": "^7.6.0"
+    "react-router-dom": "^7.6.2"
   },
   "devDependencies": {
-    "@types/react": "^19.1.2",
-    "@types/react-dom": "^19.1.2",
-    "@vitejs/plugin-react": "^4.4.1",
-    "@eslint/js": "^9.25.0",
-    "eslint": "^9.25.0",
-    "eslint-plugin-react-hooks": "^5.2.0",
-    "eslint-plugin-react-refresh": "^0.4.19",
-    "globals": "^16.0.0",
-    "typescript": "~5.8.3",
-    "typescript-eslint": "^8.30.1",
-    "tailwindcss": "^4.1.10",
+    "@eslint/js": "^9.29.0",
     "@tailwindcss/vite": "^4.1.10",
-    "vite": "^6.3.5"
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "@vitejs/plugin-react": "^4.6.0",
+    "@vitest/ui": "^2.1.8",
+    "cross-env": "^7.0.3",
+    "eslint": "^9.29.0",
+    "eslint-plugin-fsd-lint": "^1.0.9",
+    "globals": "^16.2.0",
+    "nodemon": "^3.1.9",
+    "prettier": "^3.4.2",
+    "tailwindcss": "^4.1.10",
+    "typescript": "~5.8.3",
+    "typescript-eslint": "^8.35.0",
+    "vite": "^6.3.5",
+    "vitest": "^2.1.8"
   }
 }
