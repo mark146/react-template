@@ -10,38 +10,7 @@
 
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "lint:check": "eslint . --max-warnings 0",
-    "lint:cache": "eslint . --cache",
-    "lint:src": "eslint src/",
-    "lint:src:fix": "eslint src/ --fix",
-    "lint:config": "eslint *.config.js tools/ scripts/",
-    "lint:config:fix": "eslint *.config.js tools/ scripts/ --fix",
-
-    "test": "vitest",
-    "test:run": "vitest run",
-    "test:ui": "vitest --ui",
-    "test:coverage": "vitest run --coverage",
-
-    "test:rules": "node tools/eslint/tests/rules-test.js",
-    "test:rules:watch": "nodemon tools/eslint/tests/rules-test.js",
-    "test:rules:vitest": "vitest run tools/eslint/tests/",
-    "test:rules:vitest:watch": "vitest tools/eslint/tests/",
-
-    "type-check": "tsc --noEmit",
-    "type-check:watch": "tsc --noEmit --watch",
-
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
-
-    "clean": "rm -rf dist/ node_modules/.cache/ .eslintcache",
-    "clean:deps": "rm -rf node_modules package-lock.json",
-
-    "validate": "npm run type-check && npm run lint:check && npm run test:rules",
-    "prepare": "npm run type-check && npm run lint:check",
-
-    "eslint:version": "npx eslint --version",
-    "eslint:debug": "eslint --print-config src/App.tsx",
-    "eslint:inspect": "eslint --inspect-config"
+    "lint:check": "eslint . --max-warnings 0"
   },
   "dependencies": {
     "react": "^19.1.0",
