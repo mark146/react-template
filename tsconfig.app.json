@@ -28,7 +28,8 @@
       "@/*": ["src/*"]
     },
 
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "types": ["@vitest/browser/providers/playwright"]
   },
   "include": ["src"]
 }

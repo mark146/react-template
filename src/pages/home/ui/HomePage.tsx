@@ -130,31 +130,31 @@ const HomePage: FC = () => {
                         </h2>
 
                         <div className="mb-8">
-                            <div className={`text-6xl font-bold mb-4 ${
-                                count > 10 ? 'text-accent-500' :
-                                    count > 5 ? 'text-primary-500' :
-                                        darkMode ? 'text-gray-300' : 'text-gray-700'
-                            } transition-colors duration-300`}>
-                                {count}
-                            </div>
-
-                            <div className="flex justify-center gap-4 mb-6">
+                            <div className="flex justify-center items-center gap-4 mt-8">
                                 <button
                                     onClick={decrementCount}
-                                    className="btn bg-red-500 hover:bg-red-600 text-white focus:ring-red-500"
-                                    disabled={count <= 0}
+                                    className="btn btn-secondary"
+                                    data-testid="decrement"
                                 >
                                     감소 -
                                 </button>
+                                <span
+                                    data-testid="counter"
+                                    className={`text-4xl font-bold mx-4 ${darkMode ? 'text-white' : 'text-gray-900'}`}
+                                >
+                                    {count}
+                                </span>
                                 <button
                                     onClick={incrementCount}
                                     className="btn-primary"
+                                    data-testid="increment"
                                 >
                                     증가 +
                                 </button>
                                 <button
                                     onClick={resetCount}
                                     className="btn btn-secondary"
+                                    data-testid="reset"
                                 >
                                     리셋
                                 </button>
