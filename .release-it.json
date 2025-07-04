@@ -1,0 +1,32 @@
+{
+  "git": {
+    "requireBranch": false,
+    "requireCleanWorkingDir": true,
+    "commitMessage": "chore: release v${version}",
+    "tagName": "v${version}",
+    "push": true
+  },
+  "github": {
+    "release": true,
+    "preRelease": true,
+    "releaseName": "Pre-release ${version}"
+  },
+  "npm": {
+    "publish": false
+  },
+  "hooks": {
+    "before:init": [
+      "npm test",
+      "npm run build"
+    ],
+    "after:release": [
+      "echo 🎉 릴리즈 완료! v${version}"
+    ]
+  },
+  "plugins": {
+    "@release-it/conventional-changelog": {
+      "preset": "conventionalcommits",
+      "infile": "CHANGELOG.md"
+    }
+  }
+}
