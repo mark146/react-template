@@ -1,0 +1,35 @@
+# <타입>[옵션 스코프]: <설명>
+#
+# <본문>
+#
+# <푸터>
+
+# --- 커밋 타입 (버전 증가) ---
+# feat: 새로운 기능 (minor 증가 - 0.1.0 → 0.2.0)
+# fix: 버그 수정 (patch 증가 - 0.1.0 → 0.1.1)
+# docs: 문서 변경 (버전 증가 없음)
+# style: 코드 스타일 변경 (버전 증가 없음)
+# refactor: 리팩토링 (버전 증가 없음)
+# test: 테스트 추가/수정 (버전 증가 없음)
+# chore: 빌드/도구 변경 (버전 증가 없음)
+# ci: CI 설정 변경 (버전 증가 없음)
+# perf: 성능 개선 (patch 증가)
+#
+# --- BREAKING CHANGE (major 증가) ---
+# 호환성을 깨는 변경사항이 있다면:
+# BREAKING CHANGE: 설명
+# 또는 타입 뒤에 !: feat!: 설명
+#
+# --- 스코프 예시 ---
+# auth, ui, api, db, config, test, build, release
+#
+# --- 좋은 커밋 메시지 예시 ---
+# feat(auth): add OAuth2 login integration
+# fix(ui): resolve button alignment on mobile
+# docs(readme): update installation guide
+# chore(deps): upgrade React to v19
+# feat!: redesign user authentication API
+
+# --- 실제 한글 예시 ---
+# feat(home): 홈 화면에 최근 활동 내역 추가
+# fix(api): 사용자 정보 API 응답 오류 수정

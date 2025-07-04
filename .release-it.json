@@ -1,0 +1,39 @@
+{
+  "git": {
+    "requireBranch": false,
+    "requireCleanWorkingDir": true,
+    "commitMessage": "chore: release v${version}",
+    "tagName": "v${version}",
+    "push": true
+  },
+  "npm": {
+    "publish": false,
+    "skipChecks": true
+  },
+  "github": {
+    "release": true,
+    "preRelease": false,
+    "releaseName": "Release ${version}"
+  },
+  "hooks": {
+    "before:init": [
+      "pnpm test",
+      "pnpm run build"
+    ],
+    "after:bump": [
+      "echo 📦 package.json 버전이 ${version}으로 업데이트되었습니다!"
+    ],
+    "after:release": [
+      "echo 🎉 릴리즈 완료! v${version}",
+      "echo 🔗 GitHub: https://github.com/$(git remote get-url origin | sed 's/.*github.com[:/]\\([^.]*\\).*/\\1/')/releases/tag/v${version}"
+    ]
+  },
+  "plugins": {
+    "@release-it/conventional-changelog": {
+      "preset": "conventionalcommits",
+      "infile": "CHANGELOG.md",
+      "header": "# 📋 Changelog\n\n",
+      "strictSemVer": false
+    }
+  }
+}
