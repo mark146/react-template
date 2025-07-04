@@ -1,7 +1,7 @@
 {
   "name": "react-template",
   "private": true,
-  "version": "0.0.1",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "release": "release-it",
@@ -9,6 +9,7 @@
     "release:minor": "release-it minor",
     "release:major": "release-it major",
     "release:dry": "release-it --dry-run",
+    "release:sync": "npm version 0.1.0 --no-git-tag-version",
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
