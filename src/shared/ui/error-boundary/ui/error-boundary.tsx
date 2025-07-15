@@ -1,13 +1,9 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
-
-export interface FallbackProps {
-    error?: Error;
-    resetErrorBoundary: () => void;
-}
+import type { ErrorBoundaryProps } from '@/shared/types';
 
 interface Props {
     children: ReactNode;
-    fallbackRender?: (props: FallbackProps) => ReactNode;
+    fallbackRender?: (props: ErrorBoundaryProps) => ReactNode;
     onError?: (error: Error, errorInfo: ErrorInfo) => void;
 }
 
@@ -26,16 +22,19 @@ export class ErrorBoundary extends Component<Props, State> {
         return { hasError: true, error };
     }
 
-    componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-        console.error('Error Boundary:', error, errorInfo);
+    componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
+        if (import.meta.env.DEV) {
+            console.error('Error Boundary:', error, errorInfo);
+        }
+
         this.props.onError?.(error, errorInfo);
     }
 
-    resetErrorBoundary = () => {
+    resetErrorBoundary = (): void => {
         this.setState({ hasError: false, error: undefined });
     };
 
-    render() {
+    render(): ReactNode {
         if (this.state.hasError) {
             if (this.props.fallbackRender) {
                 return this.props.fallbackRender({

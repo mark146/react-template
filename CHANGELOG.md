@@ -7,7 +7,7 @@
 ### Features
 
 * Add ESLint rule ([95dc768](https://github.com/mark146/react-template/commit/95dc768f77f23e5e8b0f30b00298a50f0b506d16))
-* add withErrorBoundary and withErrorToast providers ([bdb7280](https://github.com/mark146/react-template/commit/bdb72808b399df9f7e8765346142f6bcf41870ee))
+* add withErrorBoundary and withToast providers ([bdb7280](https://github.com/mark146/react-template/commit/bdb72808b399df9f7e8765346142f6bcf41870ee))
 * sentry 라이브러리 추가 ([c3d647e](https://github.com/mark146/react-template/commit/c3d647e9d03f04a2d5b2a6092c78e12b7104ac90))
 * tailwind 라이브러리 추가 ([a8ab0b9](https://github.com/mark146/react-template/commit/a8ab0b9c797089d4735ffd6584cdee17ca7b8942))
 
