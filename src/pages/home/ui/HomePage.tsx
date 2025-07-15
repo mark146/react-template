@@ -1,7 +1,7 @@
-import { useState, type FC } from "react";
+import { type FC, useState } from "react";
 import reactLogo from '@/shared/assets/react.svg'
 import viteLogo from '/vite.svg'
-import { useErrorToast } from "@/shared/lib/error-handling";
+import { useErrorToast } from "@/shared/lib";
 
 const HomePage: FC = () => {
     const [count, setCount] = useState(0);
@@ -157,11 +157,14 @@ const HomePage: FC = () => {
                         </h2>
 
                         <div className="mb-8">
-                            <div className={`
-                                text-6xl md:text-7xl font-bold mb-4 transition-all duration-300
+                            <div
+                                data-testid="counter"
+                                className={
+                                    `text-6xl md:text-7xl font-bold mb-4 transition-all duration-300
                                 ${darkMode ? 'text-blue-400' : 'text-blue-600'}
                                 ${count >= 10 ? 'animate-pulse text-red-500' : ''}
-                            `}>
+                                `}
+                            >
                                 {count}
                             </div>
 
@@ -169,6 +172,7 @@ const HomePage: FC = () => {
                                 darkMode ? 'bg-gray-700' : 'bg-gray-200'
                             }`}>
                                 <div
+                                    data-testid="progress-bar"
                                     className="h-full rounded-full transition-all duration-500 bg-gradient-to-r from-blue-500 to-purple-500"
                                     style={{ width: `${(count / 10) * 100}%` }}
                                 />
