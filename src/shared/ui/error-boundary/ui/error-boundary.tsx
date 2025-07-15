@@ -1,5 +1,6 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 import type { ErrorBoundaryProps } from '@/shared/types';
+import { errorLogger } from '@/shared/lib/error-handling/utils/error-utils';
 
 interface Props {
     children: ReactNode;
@@ -26,6 +27,8 @@ export class ErrorBoundary extends Component<Props, State> {
         if (import.meta.env.DEV) {
             console.error('Error Boundary:', error, errorInfo);
         }
+
+        errorLogger.logError(error, { errorInfo });
 
         this.props.onError?.(error, errorInfo);
     }

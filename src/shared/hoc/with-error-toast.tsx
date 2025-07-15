@@ -1,6 +1,6 @@
 import { type ComponentType, useState } from 'react';
 import { ErrorToastContext, ToastContainer } from '@/shared/ui/toast';
-import { DEFAULT_TOAST_DURATION, generateErrorId } from '@/shared/lib/error-handling';
+import { DEFAULT_TOAST_DURATION, generateErrorId, errorLogger } from '@/shared/lib';
 import type { ErrorToastContextValue, ToastConfig } from '@/shared/types';
 
 export const withErrorToast = <P extends object>(
@@ -26,6 +26,10 @@ export const withErrorToast = <P extends object>(
             };
 
             setToasts(prev => [...prev, newToast]);
+
+            if (type === 'error') {
+                errorLogger.logError(message, { id, ...options });
+            }
 
             if (!options.persistent && duration > 0) {
                 setTimeout(() => {

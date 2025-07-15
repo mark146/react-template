@@ -38,5 +38,47 @@ export function initSentry(): void {
         ],
         replaysSessionSampleRate: config.replaysSessionSampleRate,
         replaysOnErrorSampleRate: config.replaysOnErrorSampleRate,
+        beforeSend(event, hint) {
+            if (import.meta.env.DEV) {
+                console.error('🚨 Sentry Error:', event, hint);
+            }
+            return event;
+        },
     });
 }
+
+export const captureException = (error: Error, context?: {
+    tags?: Record<string, string>;
+    extra?: Record<string, any>;
+    user?: Record<string, any>;
+    fingerprint?: string[];
+}) => {
+    if (!import.meta.env.VITE_SENTRY_DSN) {
+        console.error('Error captured (Sentry not configured):', error, context);
+        return;
+    }
+
+    Sentry.withScope((scope) => {
+        if (context?.tags) {
+            Object.entries(context.tags).forEach(([key, value]) => {
+                scope.setTag(key, value);
+            });
+        }
+
+        if (context?.extra) {
+            Object.entries(context.extra).forEach(([key, value]) => {
+                scope.setExtra(key, value);
+            });
+        }
+
+        if (context?.user) {
+            scope.setUser(context.user);
+        }
+
+        if (context?.fingerprint) {
+            scope.setFingerprint(context.fingerprint);
+        }
+
+        Sentry.captureException(error);
+    });
+};

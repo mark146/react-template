@@ -1,4 +1,5 @@
 import type { BaseError } from '@/shared/types';
+import { captureException } from '@/shared/lib/sentry/config';
 
 export const generateErrorId = (): string => {
     return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -23,3 +24,19 @@ export const getErrorDetails = (error: Error): { message: string; stack?: string
 
 export const DEFAULT_TOAST_DURATION = 5000;
 export const PERSISTENT_TOAST_DURATION = -1;
+
+export interface ErrorLogger {
+    logError: (error: unknown, context?: Record<string, any>) => void;
+}
+
+export let errorLogger: ErrorLogger = {
+    logError: (error, context) => {
+        captureException(
+            error instanceof Error ? error : new Error(String(error)),
+            { extra: context }
+        );
+        if (import.meta.env.DEV) {
+            console.error('Error:', error, context);
+        }
+    },
+};

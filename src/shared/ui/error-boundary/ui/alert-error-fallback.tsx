@@ -63,14 +63,14 @@ export const AlertErrorFallback: FC<ErrorBoundaryProps> = ({
                                 개발자 정보
                             </summary>
                             <pre className="mt-2 text-xs bg-gray-100 p-2 rounded overflow-auto whitespace-pre-wrap">
-                {errorDetails.message}
+                                {errorDetails.message}
                                 {errorDetails.stack && (
                                     <>
                                         {'\n'}
                                         {errorDetails.stack}
                                     </>
                                 )}
-              </pre>
+                            </pre>
                         </details>
                     )}
                 </div>

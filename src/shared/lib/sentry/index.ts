@@ -1,1 +1,4 @@
-export { initSentry } from './config';
+export {
+    initSentry,
+    captureException,
+} from './config';
