@@ -1,7 +1,7 @@
 import { type ComponentType, useState } from 'react';
 import { ErrorToastContext, ToastContainer } from '@/shared/ui/toast';
-import { DEFAULT_TOAST_DURATION, generateErrorId, errorLogger } from '@/shared/lib';
-import type { ErrorToastContextValue, ToastConfig } from '@/shared/types';
+import { buildComponentErrorMetadata, DEFAULT_TOAST_DURATION, generateErrorId, logError } from '@/shared/lib';
+import type { ErrorMetadata, ErrorToastContextValue, SentryLevel, ToastConfig } from '@/shared/types';
 
 export const withErrorToast = <P extends object>(
     Component: ComponentType<P>
@@ -12,26 +12,55 @@ export const withErrorToast = <P extends object>(
         const showToast: ErrorToastContextValue['showToast'] = (
             message,
             type = 'error',
-            options = {}
+            errorOrMeta = {}
         ) => {
             const id = generateErrorId();
-            const duration = options.duration ?? DEFAULT_TOAST_DURATION;
+            let errorStack: string | undefined;
+            let metadata: Partial<ErrorMetadata> = {};
+
+            if (errorOrMeta instanceof Error) {
+                errorStack = errorOrMeta.stack;
+                metadata = {};
+
+                const errorMetadata = buildComponentErrorMetadata(
+                    {
+                        componentName: 'ErrorToast',
+                        feature: 'toast-display',
+                        action: 'showToast',
+                    },
+                    type as SentryLevel || 'error'
+                );
+
+                logError(errorOrMeta, errorMetadata);
+
+            } else {
+                metadata = errorOrMeta ?? {};
+
+                if (metadata._logError) {
+                    logError(metadata._logError.error, metadata._logError.meta);
+                }
+            }
+
+            const duration = metadata.duration ?? DEFAULT_TOAST_DURATION;
 
             const newToast: ToastConfig = {
                 id,
                 message,
                 type,
                 duration,
-                ...options,
+                persistent: metadata.persistent,
+                errorStack,
+                level: metadata.level,
+                tags: metadata.tags,
+                contexts: metadata.contexts,
+                extra: metadata.extra,
+                user: metadata.user,
+                fingerprint: metadata.fingerprint,
             };
 
             setToasts(prev => [...prev, newToast]);
 
-            if (type === 'error') {
-                errorLogger.logError(message, { id, ...options });
-            }
-
-            if (!options.persistent && duration > 0) {
+            if (!metadata.persistent && duration > 0) {
                 setTimeout(() => {
                     removeToast(id);
                 }, duration);
