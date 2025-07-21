@@ -1,5 +1,5 @@
-import { Component, ReactNode } from 'react';
-import type { ErrorInfo } from 'react';
+import { Component } from 'react';
+import type { ErrorInfo, ReactNode } from 'react';
 import type { ErrorBoundaryProps } from '@/shared/types';
 import { withErrorBoundaryLogging } from '@/shared/lib/error-handling/utils/logging-helpers';
 
@@ -29,7 +29,6 @@ export class ErrorBoundary extends Component<Props, State> {
         this.state = { hasError: false };
         this.maxRetries = props.maxRetries || 3;
 
-        // 🔥 에러 로깅 추상화
         this.errorLogger = withErrorBoundaryLogging({
             componentName: props.componentName || 'UnknownComponent',
             feature: props.feature || 'error-boundary',
@@ -46,17 +45,21 @@ export class ErrorBoundary extends Component<Props, State> {
     }
 
     componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
-        // 에러 정보를 state에 저장
-        this.setState({ errorInfo });
+        // 모든 에러 관련 정보를 state에 저장
+        this.setState({
+            hasError: true,
+            error,
+            errorInfo,
+            errorId: `boundary-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+        });
 
-        // 🔥 추상화된 에러 로깅 (순환 참조 안전)
-        this.errorLogger.logError(error, errorInfo, {
+        this.errorLogger.logError(error, {
             retryCount: this.retryCount,
             props: this.props,
             state: this.state,
+            errorInfo: errorInfo
         });
 
-        // 커스텀 에러 핸들러 호출
         if (this.props.onError) {
             this.errorLogger.logCustomHandler(() => {
                 this.props.onError!(error, errorInfo);
@@ -67,13 +70,11 @@ export class ErrorBoundary extends Component<Props, State> {
     resetErrorBoundary = (): void => {
         this.retryCount += 1;
 
-        // 🔥 최대 재시도 초과 체크
         if (this.retryCount > this.maxRetries) {
             this.errorLogger.logMaxRetriesExceeded();
-            return; // 더 이상 재시도하지 않음
+            return;
         }
 
-        // 🔥 추상화된 재시도 로깅
         this.errorLogger.logRetry(this.retryCount);
 
         this.setState({
@@ -84,16 +85,20 @@ export class ErrorBoundary extends Component<Props, State> {
         });
     };
 
-    componentDidUpdate(prevProps: Props, prevState: State): void {
-        // 🔥 에러에서 복구된 경우 로깅
+    componentDidUpdate(_prevProps: Props, prevState: State): void {
         if (prevState.hasError && !this.state.hasError) {
             this.errorLogger.logRecovery();
         }
     }
 
+    handleReload = () => {
+        if (typeof window !== 'undefined' && window.location) {
+            window.location.reload();
+        }
+    };
+
     render(): ReactNode {
         if (this.state.hasError) {
-            // 최대 재시도 횟수 초과 검사
             const canRetry = this.retryCount < this.maxRetries;
 
             if (this.props.fallbackRender) {
@@ -170,7 +175,7 @@ export class ErrorBoundary extends Component<Props, State> {
                                 )}
 
                                 <button
-                                    onClick={() => window.location.reload()}
+                                    onClick={this.handleReload}
                                     className={`${canRetry ? 'flex-1' : 'w-full'} bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium py-2 px-4 rounded-md transition-colors`}
                                 >
                                     페이지 새로고침

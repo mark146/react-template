@@ -10,7 +10,6 @@ import type {
     SentryUser,
     SentryLevel
 } from '@/shared/types';
-import type { ErrorInfo } from 'react';
 
 const loggedErrors = new WeakSet<Error>();
 const loggedErrorMessages = new Set<string>();
@@ -59,7 +58,7 @@ function createLogContext(componentName?: string, action?: string) {
 
 function handleErrorLogging(error: Error, logContext: string, onError?: (msg: string) => void, errorToastMessage?: string) {
     if (shouldSkipLogging(error, logContext)) {
-        onError?.(errorToastMessage);
+        onError?.(errorToastMessage ?? '');
         return true;
     }
     return false;
@@ -105,11 +104,11 @@ export const withErrorBoundaryLogging = (config: {
     return {
         logError: (
             error: Error,
-            errorInfo: ErrorInfo, // eslint-disable-line @typescript-eslint/no-unused-vars
             context: {
                 retryCount: number;
                 props: any;
                 state: any;
+                errorInfo: any;
             }
         ) => {
             try {
