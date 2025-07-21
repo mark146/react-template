@@ -1,5 +1,6 @@
 import { customRulesPlugin } from './tools/eslint/index.js';
 import fsdLint from 'eslint-plugin-fsd-lint';
+import tsParser from '@typescript-eslint/parser';
 
 export default [
 	{
@@ -43,10 +44,12 @@ export default [
 		languageOptions: {
 			ecmaVersion: 2022,
 			sourceType: 'module',
+			parser: tsParser, // TypeScript 파서 명시
 			parserOptions: {
 				ecmaFeatures: {
 					jsx: true
-				}
+				},
+				project: './tsconfig.json', // tsconfig 경로 명시
 			},
 			globals: {
 				console: 'readonly',
