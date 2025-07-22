@@ -11,6 +11,7 @@
     "release:dry": "release-it --dry-run",
     "release:sync": "npm version 0.1.0 --no-git-tag-version",
     "dev": "vite",
+    "prebuild": "node tools/env/generate-env.cjs",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "lint": "eslint .",
