@@ -1,1 +1,2 @@
-export { ErrorToastContext } from './toast-store';
+export * from './toast-store';
+export * from './use-toast';

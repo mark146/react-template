@@ -1,16 +1,17 @@
 import type {
-    ErrorMetadata,
-    ComponentErrorContext,
-    BusinessLogicContext,
     ApiErrorContext,
+    BusinessLogicContext,
+    ComponentErrorContext,
+    ErrorMetadata,
+    SentryContext,
     SentryLevel,
     SentryTags,
-    SentryContext,
     SentryUser
 } from '@/shared/types';
-import { captureException, captureMessage } from '@/shared/lib/sentry/config';
-import { createSafeSummary } from './safe-json-utils';
+import { createSafeSummary } from "@/shared";
+import { captureException, captureMessage } from "@/shared/sentry";
 
+export const DEFAULT_TOAST_DURATION = 5000;
 export const generateErrorId = (): string => {
     return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 };
@@ -19,14 +20,13 @@ export const getErrorDetails = (error: Error): { message: string; stack?: string
     message: error.message,
     stack: error.stack,
 });
-
-export const DEFAULT_TOAST_DURATION = 5000;
-
 export const buildBaseMetadata = (
     level: SentryLevel = 'error',
     baseTags: SentryTags = {},
     baseContexts: SentryContext = {},
-    user?: SentryUser
+    user?: SentryUser,
+    componentOrPage?: string,
+    extra?: Record<string, any>
 ): ErrorMetadata => ({
     level,
     tags: {
@@ -47,55 +47,14 @@ export const buildBaseMetadata = (
         // 🔥 화면 정보
         'screen.resolution': `${screen.width}x${screen.height}`,
         'viewport.size': `${window.innerWidth}x${window.innerHeight}`,
+        ...(componentOrPage ? { 'component.page': componentOrPage } : {}),
         ...baseTags,
     },
     contexts: {
-        runtime: {
-            name: 'browser',
-            version: navigator.userAgent,
-        },
-        app: {
-            app_start_time: performance.timeOrigin,
-            build_type: import.meta.env.MODE,
-            version: import.meta.env.VITE_APP_VERSION || '1.0.0',
-            buildTime: import.meta.env.VITE_BUILD_TIME || 'unknown',
-            buildHash: import.meta.env.VITE_BUILD_HASH || 'unknown',
-            nodeVersion: import.meta.env.VITE_NODE_VERSION || 'unknown',
-        },
-        page_context: {
-            pathname: window.location.pathname,
-            search: window.location.search,
-            hash: window.location.hash,
-            referrer: document.referrer,
-            title: document.title,
-            scrollPosition: `${window.scrollX},${window.scrollY}`,
-            loadTime: performance.now(),
-        },
-        session_context: {
-            id: sessionStorage.getItem('sessionId') || 'unknown',
-            startTime: sessionStorage.getItem('sessionStartTime') || new Date().toISOString(),
-            pageViews: sessionStorage.getItem('pageViews') || '1',
-        },
         ...baseContexts,
+        ...(extra ? { extra } : {}),
     },
     user,
-    extra: {
-        url: window.location.href,
-        referrer: document.referrer,
-        timestamp: Date.now(),
-        userAgent: navigator.userAgent,
-        language: navigator.language,
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        cookieEnabled: navigator.cookieEnabled,
-        onLine: navigator.onLine,
-        ...(('memory' in performance) && {
-            memoryUsage: {
-                used: (performance as any).memory.usedJSHeapSize,
-                total: (performance as any).memory.totalJSHeapSize,
-                limit: (performance as any).memory.jsHeapSizeLimit,
-            }
-        }),
-    },
 });
 
 const getBrowserName = (): string => {
@@ -307,7 +266,7 @@ export const buildBusinessLogicInfoMetadata = (
     };
 };
 
-// API 에러 메타데이터 빌더 (대폭 강화)
+// API 에러 메타데이터 빌더
 export const buildApiErrorMetadata = (
     context: ApiErrorContext,
     level: SentryLevel = 'error',
@@ -577,7 +536,6 @@ export const logError = (
 
         captureException(structuredError, finalMetadata);
     } else {
-        // info, warning, debug는 captureMessage 사용
         captureMessage(finalMessage, finalMetadata);
     }
 };
@@ -718,25 +676,4 @@ export const logBusinessLogicMessage = (
     };
 
     logMessage(message, metadata, defaultOptions);
-};
-
-export const logApiError = (
-    error: unknown,
-    context: ApiErrorContext,
-    level: SentryLevel = 'error',
-    user?: SentryUser,
-    options?: {
-        useStructuredTitle?: boolean;
-        titlePrefix?: string;
-    }
-) => {
-    const metadata = buildApiErrorMetadata(context, level, user);
-
-    const defaultOptions = {
-        useStructuredTitle: true,
-        titlePrefix: level === 'fatal' ? '💀 ' : level === 'error' ? '🌐 ' : level === 'warning' ? '⚠️ ' : '🔍 ',
-        ...options
-    };
-
-    logError(error, metadata, defaultOptions);
 };

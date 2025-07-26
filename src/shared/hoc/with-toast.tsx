@@ -1,15 +1,15 @@
 import { type ComponentType, useState } from 'react';
-import { ErrorToastContext, ToastContainer } from '@/shared/ui/toast';
-import { buildComponentErrorMetadata, DEFAULT_TOAST_DURATION, generateErrorId, logError } from '@/shared/lib';
-import type { ErrorMetadata, ErrorToastContextValue, SentryLevel, ToastConfig } from '@/shared/types';
+import type { ErrorMetadata, SentryLevel, ToastConfig, ToastContextValue } from '../types';
+import { DEFAULT_TOAST_DURATION, generateErrorId, logError } from '../error';
+import { buildComponentErrorMetadata, ToastContainer, ToastContext } from "@/shared";
 
-export const withErrorToast = <P extends object>(
+export const withToast = <P extends object>(
     Component: ComponentType<P>
 ) => {
     return function WithErrorToast(props: P) {
         const [toasts, setToasts] = useState<ToastConfig[]>([]);
 
-        const showToast: ErrorToastContextValue['showToast'] = (
+        const showToast: ToastContextValue['showToast'] = (
             message,
             type = 'error',
             errorOrMeta = {}
@@ -32,7 +32,6 @@ export const withErrorToast = <P extends object>(
                 );
 
                 logError(errorOrMeta, errorMetadata);
-
             } else {
                 metadata = errorOrMeta ?? {};
 
@@ -75,17 +74,17 @@ export const withErrorToast = <P extends object>(
             setToasts([]);
         };
 
-        const contextValue: ErrorToastContextValue = {
+        const contextValue: ToastContextValue = {
             showToast,
             removeToast,
             clearAllToasts,
         };
 
         return (
-            <ErrorToastContext.Provider value={contextValue}>
+            <ToastContext.Provider value={contextValue}>
                 <Component {...props} />
                 <ToastContainer toasts={toasts} onRemoveToast={removeToast} />
-            </ErrorToastContext.Provider>
+            </ToastContext.Provider>
         );
     };
 };

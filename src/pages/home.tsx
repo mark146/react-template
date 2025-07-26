@@ -1,14 +1,13 @@
-import { type FC, useState, useCallback } from "react";
-import reactLogo from '@/shared/assets/react.svg';
+import { type FC, useCallback, useState } from "react";
 import viteLogo from '/public/vite.svg';
-import { useErrorToast } from '@/shared/lib/error-handling/hooks/use-error-toast';
 import {
-    withComponentLogging,
-    withBusinessLogicLogging
-} from '@/shared/lib/error-handling/utils/logging-helpers';
-import type { SentryUser } from '@/shared/types/error';
-import { ERROR_MESSAGES, SUCCESS_MESSAGES, WARNING_MESSAGES } from "@/shared/lib/error-handling/constants/messages.ts";
-
+    ReactLogo,
+    type SentryUser,
+    useToast,
+    withBusinessLogicLogging,
+    withComponentLogging
+} from "@/shared";
+import { ERROR_MESSAGES, SUCCESS_MESSAGES, WARNING_MESSAGES } from "@/shared/error/constants";
 
 const getSessionUser = (): SentryUser | undefined => {
     try {
@@ -37,15 +36,15 @@ const getSessionUser = (): SentryUser | undefined => {
     return undefined;
 };
 
-const HomePage: FC = () => {
+const Home: FC = () => {
     const [count, setCount] = useState(0);
     const [darkMode, setDarkMode] = useState(false);
-    const { showToast } = useErrorToast();
+    const { showToast } = useToast();
     const user = getSessionUser();
 
     const toggleDarkMode = useCallback(() => {
         const action = withComponentLogging({
-            componentName: 'HomePage',
+            componentName: 'Home',
             feature: 'theme',
             action: 'toggleDarkMode'
         }, user);
@@ -66,7 +65,7 @@ const HomePage: FC = () => {
 
     const incrementCount = useCallback(() => {
         const action = withComponentLogging({
-            componentName: 'HomePage',
+            componentName: 'Home',
             feature: 'counter',
             action: 'incrementCount'
         }, user);
@@ -74,7 +73,7 @@ const HomePage: FC = () => {
             businessRule: 'counter-limits',
             expectedBehavior: '카운터 증가/감소 제한 검증',
             actualBehavior: '비즈니스 규칙에 따른 동작',
-            componentName: 'HomePage',
+            componentName: 'Home',
             feature: 'counter',
             action: 'incrementCount',
         }, user);
@@ -104,7 +103,7 @@ const HomePage: FC = () => {
 
     const decrementCount = useCallback(() => {
         const action = withComponentLogging({
-            componentName: 'HomePage',
+            componentName: 'Home',
             feature: 'counter',
             action: 'decrementCount'
         }, user);
@@ -127,7 +126,7 @@ const HomePage: FC = () => {
 
     const resetCount = useCallback(() => {
         const action = withComponentLogging({
-            componentName: 'HomePage',
+            componentName: 'Home',
             feature: 'counter',
             action: 'resetCount'
         }, user);
@@ -207,7 +206,7 @@ const HomePage: FC = () => {
                             className="group"
                         >
                             <img
-                                src={reactLogo}
+                                src={ReactLogo}
                                 className="h-16 w-16 md:h-24 md:w-24 transition-transform duration-300 group-hover:scale-110"
                                 alt="React logo"
                                 style={{
@@ -367,5 +366,5 @@ const HomePage: FC = () => {
     );
 };
 
-export default HomePage;
+export default Home;
 

@@ -1,7 +1,7 @@
-import { Component } from 'react';
 import type { ErrorInfo, ReactNode } from 'react';
+import { Component } from 'react';
 import type { ErrorBoundaryProps } from '@/shared/types';
-import { withErrorBoundaryLogging } from '@/shared/lib/error-handling/utils/logging-helpers';
+import { withErrorBoundaryLogging } from "@/shared";
 
 interface Props {
     children: ReactNode;

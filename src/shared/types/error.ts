@@ -1,9 +1,3 @@
-export interface BaseError {
-    message: string;
-    code?: string;
-    timestamp?: number;
-}
-
 export type ToastType = 'error' | 'success' | 'warning' | 'info';
 
 export type SentryLevel = 'fatal' | 'error' | 'warning' | 'info' | 'debug';
@@ -65,7 +59,7 @@ export interface ErrorBoundaryProps {
     canRetry?: boolean;
 }
 
-export interface ErrorToastContextValue {
+export interface ToastContextValue {
     showToast: (
         message: string,
         type?: ToastType,

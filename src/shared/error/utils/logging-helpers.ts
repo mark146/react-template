@@ -1,15 +1,5 @@
-import {
-    logComponentError,
-    logComponentMessage,
-    logBusinessLogicError,
-    logBusinessLogicMessage
-} from './error-utils';
-import type {
-    ComponentErrorContext,
-    BusinessLogicContext,
-    SentryUser,
-    SentryLevel
-} from '@/shared/types';
+import { logBusinessLogicError, logBusinessLogicMessage, logComponentError, logComponentMessage } from '@/shared/error';
+import type { BusinessLogicContext, ComponentErrorContext, SentryLevel, SentryUser } from '@/shared/types';
 
 const loggedErrors = new WeakSet<Error>();
 const loggedErrorMessages = new Set<string>();

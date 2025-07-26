@@ -1,8 +1,8 @@
 import type { FC } from 'react';
 import type { ErrorBoundaryProps } from '@/shared/types';
-import { getErrorDetails } from '@/shared/lib/error-handling';
+import { getErrorDetails } from "@/shared";
 
-export const AlertErrorFallback: FC<ErrorBoundaryProps> = ({
+export const ErrorFallback: FC<ErrorBoundaryProps> = ({
                                                                error,
                                                                resetErrorBoundary
                                                            }) => {
