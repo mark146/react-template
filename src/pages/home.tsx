@@ -1,57 +1,148 @@
-import { type FC, useState } from "react";
-import reactLogo from '@/shared/assets/react.svg'
-import viteLogo from '/vite.svg'
-import { useErrorToast } from "@/shared/lib";
+import { type FC, useCallback, useState } from "react";
+import viteLogo from '/public/vite.svg';
+import {
+    ReactLogo,
+    type SentryUser,
+    useToast,
+    withBusinessLogicLogging,
+    withComponentLogging
+} from "@/shared";
+import { ERROR_MESSAGES, SUCCESS_MESSAGES, WARNING_MESSAGES } from "@/shared/error/constants";
 
-const HomePage: FC = () => {
+const getSessionUser = (): SentryUser | undefined => {
+    try {
+        if (!sessionStorage.getItem('sessionId')) {
+            const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+            const startTime = new Date().toISOString();
+            sessionStorage.setItem('sessionId', sessionId);
+            sessionStorage.setItem('sessionStartTime', startTime);
+            sessionStorage.setItem('pageViews', '1');
+        } else {
+            const currentViews = parseInt(sessionStorage.getItem('pageViews') || '1');
+            sessionStorage.setItem('pageViews', (currentViews + 1).toString());
+        }
+        const sessionUser = sessionStorage.getItem('user');
+        if (sessionUser) {
+            const user = JSON.parse(sessionUser);
+            return {
+                id: user.id,
+                email: user.email,
+                username: user.username,
+            };
+        }
+    } catch (error) {
+        console.warn('세션 사용자 정보 파싱 실패:', error);
+    }
+    return undefined;
+};
+
+const Home: FC = () => {
     const [count, setCount] = useState(0);
     const [darkMode, setDarkMode] = useState(false);
-    const { showToast } = useErrorToast();
+    const { showToast } = useToast();
+    const user = getSessionUser();
 
-    const toggleDarkMode = () => {
-        try {
-            setDarkMode(!darkMode);
+    const toggleDarkMode = useCallback(() => {
+        const action = withComponentLogging({
+            componentName: 'Home',
+            feature: 'theme',
+            action: 'toggleDarkMode'
+        }, user);
+        action.execute(() => {
+            const newDarkMode = !darkMode;
+            setDarkMode(newDarkMode);
             document.documentElement.classList.toggle('dark');
             showToast(`${darkMode ? '라이트' : '다크'} 모드로 변경되었습니다.`, 'success');
-        } catch (error) {
-            showToast('다크모드 전환 중 오류가 발생했습니다.');
-        }
-    };
+            return { darkMode: newDarkMode };
+        }, {
+            successMessage: SUCCESS_MESSAGES.DARKMODE_TOGGLE,
+            errorMessage: ERROR_MESSAGES.DARKMODE_TOGGLE,
+            errorToastMessage: ERROR_MESSAGES.DARKMODE_TOGGLE,
+            state: { darkMode, count },
+            onError: (message) => showToast(message, 'error')
+        });
+    }, [darkMode, showToast, user, count]);
 
-    const incrementCount = () => {
-        try {
+    const incrementCount = useCallback(() => {
+        const action = withComponentLogging({
+            componentName: 'Home',
+            feature: 'counter',
+            action: 'incrementCount'
+        }, user);
+        const businessLogic = withBusinessLogicLogging({
+            businessRule: 'counter-limits',
+            expectedBehavior: '카운터 증가/감소 제한 검증',
+            actualBehavior: '비즈니스 규칙에 따른 동작',
+            componentName: 'Home',
+            feature: 'counter',
+            action: 'incrementCount',
+        }, user);
+        action.execute(() => {
             if (count >= 10) {
-                throw new Error('카운터가 최대값(10)에 도달했습니다.');
+                businessLogic.validateAndWarn(
+                    WARNING_MESSAGES.COUNTER_MAX,
+                    { currentCount: count, attemptedAction: 'increment' },
+                    () => showToast(WARNING_MESSAGES.COUNTER_MAX, 'warning')
+                );
+                return undefined;
             }
-            setCount(count + 1);
-
-            if (count + 1 === 10) {
-                showToast('최대값에 도달했습니다!', 'warning');
+            const newCount = count + 1;
+            setCount(newCount);
+            if (newCount === 10) {
+                showToast(WARNING_MESSAGES.COUNTER_MAX, 'warning');
             }
-        } catch (error) {
-            showToast((error as Error).message, 'error');
-        }
-    };
+            return { count: newCount, darkMode };
+        }, {
+            successMessage: SUCCESS_MESSAGES.COUNTER_INCREMENT,
+            errorMessage: ERROR_MESSAGES.COUNTER_INCREMENT,
+            errorToastMessage: ERROR_MESSAGES.COUNTER_INCREMENT,
+            state: { count, darkMode },
+            onError: (message) => showToast(message, 'error')
+        });
+    }, [count, darkMode, showToast, user]);
 
-    const decrementCount = () => {
-        try {
+    const decrementCount = useCallback(() => {
+        const action = withComponentLogging({
+            componentName: 'Home',
+            feature: 'counter',
+            action: 'decrementCount'
+        }, user);
+        action.execute(() => {
             if (count <= 0) {
-                throw new Error('카운터가 최소값(0)에 도달했습니다.');
+                showToast(WARNING_MESSAGES.COUNTER_MIN, 'warning');
+                return undefined;
             }
-            setCount(count - 1);
-        } catch (error) {
-            showToast((error as Error).message, 'error');
-        }
-    };
+            const newCount = count - 1;
+            setCount(newCount);
+            return { count: newCount, darkMode };
+        }, {
+            successMessage: SUCCESS_MESSAGES.COUNTER_DECREMENT,
+            errorMessage: ERROR_MESSAGES.COUNTER_DECREMENT,
+            errorToastMessage: ERROR_MESSAGES.COUNTER_DECREMENT,
+            state: { count, darkMode },
+            onError: (message) => showToast(message, 'error')
+        });
+    }, [count, darkMode, showToast, user]);
 
-    const resetCount = () => {
-        try {
+    const resetCount = useCallback(() => {
+        const action = withComponentLogging({
+            componentName: 'Home',
+            feature: 'counter',
+            action: 'resetCount'
+        }, user);
+        action.execute(() => {
+            const previousCount = count;
             setCount(0);
-            showToast('카운터가 리셋되었습니다.', 'success');
-        } catch (error) {
-            showToast('카운터 리셋 중 오류가 발생했습니다.');
-        }
-    };
+            showToast(SUCCESS_MESSAGES.COUNTER_RESET, 'success');
+            return { previousCount, newCount: 0, darkMode };
+        }, {
+            successMessage: SUCCESS_MESSAGES.COUNTER_RESET,
+            errorMessage: ERROR_MESSAGES.COUNTER_RESET,
+            errorToastMessage: ERROR_MESSAGES.COUNTER_RESET,
+            state: { count, darkMode },
+            onError: (message) => showToast(message, 'error')
+        });
+    }, [count, darkMode, showToast, user]);
 
     return (
         <div className={`min-h-screen transition-all duration-500 ${
@@ -69,14 +160,14 @@ const HomePage: FC = () => {
                     <button
                         onClick={toggleDarkMode}
                         className={`
-                            px-4 py-2 rounded-lg font-medium transition-all duration-300 
-                            transform hover:scale-105 active:scale-95
-                            ${darkMode
+              px-4 py-2 rounded-lg font-medium transition-all duration-300 
+              transform hover:scale-105 active:scale-95
+              ${darkMode
                             ? 'bg-yellow-500 hover:bg-yellow-400 text-gray-900 shadow-yellow-500/20'
                             : 'bg-gray-800 hover:bg-gray-700 text-white shadow-gray-800/20'
                         } 
-                            shadow-lg hover:shadow-xl
-                        `}
+              shadow-lg hover:shadow-xl
+            `}
                         aria-label={`${darkMode ? '라이트' : '다크'} 모드로 전환`}
                     >
                         {darkMode ? '☀️ Light' : '🌙 Dark'}
@@ -115,7 +206,7 @@ const HomePage: FC = () => {
                             className="group"
                         >
                             <img
-                                src={reactLogo}
+                                src={ReactLogo}
                                 className="h-16 w-16 md:h-24 md:w-24 transition-transform duration-300 group-hover:scale-110"
                                 alt="React logo"
                                 style={{
@@ -143,13 +234,13 @@ const HomePage: FC = () => {
 
                 <section className="flex justify-center">
                     <div className={`
-                        p-6 md:p-8 rounded-2xl shadow-2xl backdrop-blur-sm transition-all duration-500
-                        border min-w-80 max-w-md w-full
-                        ${darkMode
+            p-6 md:p-8 rounded-2xl shadow-2xl backdrop-blur-sm transition-all duration-500
+            border min-w-80 max-w-md w-full
+            ${darkMode
                         ? 'bg-gray-800/90 border-gray-700 shadow-gray-900/50'
                         : 'bg-white/80 border-gray-200 shadow-gray-500/20'
                     }
-                    `}>
+          `}>
                         <h2 className={`text-xl md:text-2xl font-semibold mb-6 transition-colors ${
                             darkMode ? 'text-white' : 'text-gray-900'
                         }`}>
@@ -161,9 +252,9 @@ const HomePage: FC = () => {
                                 data-testid="counter"
                                 className={
                                     `text-6xl md:text-7xl font-bold mb-4 transition-all duration-300
-                                ${darkMode ? 'text-blue-400' : 'text-blue-600'}
-                                ${count >= 10 ? 'animate-pulse text-red-500' : ''}
-                                `}
+                  ${darkMode ? 'text-blue-400' : 'text-blue-600'}
+                  ${count >= 10 ? 'animate-pulse text-red-500' : ''}
+                  `}
                             >
                                 {count}
                             </div>
@@ -184,15 +275,15 @@ const HomePage: FC = () => {
                                 onClick={decrementCount}
                                 disabled={count <= 0}
                                 className={`
-                                    py-3 px-4 rounded-lg font-medium transition-all duration-200 
-                                    transform hover:scale-105 active:scale-95
-                                    disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100
-                                    ${darkMode
+                  py-3 px-4 rounded-lg font-medium transition-all duration-200 
+                  transform hover:scale-105 active:scale-95
+                  disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100
+                  ${darkMode
                                     ? 'bg-red-600 hover:bg-red-500 text-white shadow-red-600/30'
                                     : 'bg-red-500 hover:bg-red-600 text-white shadow-red-500/30'
                                 } 
-                                    shadow-lg hover:shadow-xl
-                                `}
+                  shadow-lg hover:shadow-xl
+                `}
                                 data-testid="decrement"
                                 aria-label={`카운터 감소, 현재 값: ${count}`}
                             >
@@ -202,14 +293,14 @@ const HomePage: FC = () => {
                             <button
                                 onClick={resetCount}
                                 className={`
-                                    py-3 px-4 rounded-lg font-medium transition-all duration-200 
-                                    transform hover:scale-105 active:scale-95
-                                    ${darkMode
+                  py-3 px-4 rounded-lg font-medium transition-all duration-200 
+                  transform hover:scale-105 active:scale-95
+                  ${darkMode
                                     ? 'bg-gray-600 hover:bg-gray-500 text-white shadow-gray-600/30'
                                     : 'bg-gray-500 hover:bg-gray-600 text-white shadow-gray-500/30'
                                 } 
-                                    shadow-lg hover:shadow-xl
-                                `}
+                  shadow-lg hover:shadow-xl
+                `}
                                 data-testid="reset"
                                 aria-label="카운터 리셋"
                             >
@@ -220,15 +311,15 @@ const HomePage: FC = () => {
                                 onClick={incrementCount}
                                 disabled={count >= 10}
                                 className={`
-                                    py-3 px-4 rounded-lg font-medium transition-all duration-200 
-                                    transform hover:scale-105 active:scale-95
-                                    disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100
-                                    ${darkMode
+                  py-3 px-4 rounded-lg font-medium transition-all duration-200 
+                  transform hover:scale-105 active:scale-95
+                  disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100
+                  ${darkMode
                                     ? 'bg-green-600 hover:bg-green-500 text-white shadow-green-600/30'
                                     : 'bg-green-500 hover:bg-green-600 text-white shadow-green-500/30'
                                 } 
-                                    shadow-lg hover:shadow-xl
-                                `}
+                  shadow-lg hover:shadow-xl
+                `}
                                 data-testid="increment"
                                 aria-label={`카운터 증가, 현재 값: ${count}`}
                             >
@@ -257,13 +348,13 @@ const HomePage: FC = () => {
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className={`
-                                    text-sm px-3 py-2 rounded-lg transition-all duration-200 
-                                    hover:scale-105 active:scale-95
-                                    ${darkMode
+                  text-sm px-3 py-2 rounded-lg transition-all duration-200 
+                  hover:scale-105 active:scale-95
+                  ${darkMode
                                     ? 'text-gray-400 hover:text-blue-400 hover:bg-gray-800'
                                     : 'text-gray-600 hover:text-blue-600 hover:bg-gray-100'
                                 }
-                                `}
+                `}
                             >
                                 {link.text}
                             </a>
@@ -275,4 +366,5 @@ const HomePage: FC = () => {
     );
 };
 
-export default HomePage;
+export default Home;
+

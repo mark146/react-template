@@ -1,4 +1,4 @@
 import { createContext } from 'react';
-import type { ErrorToastContextValue } from '@/shared/types';
+import type { ToastContextValue } from '@/shared/types';
 
-export const ErrorToastContext = createContext<ErrorToastContextValue | null>(null);
+export const ToastContext = createContext<ToastContextValue | null>(null);
