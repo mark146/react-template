@@ -1,2 +1,2 @@
-export { withErrorToast } from './with-error-toast';
-export { withErrorBoundary } from './with-error-boundary';
+export * from './with-error-monitoring';
+export * from './with-toast.tsx';

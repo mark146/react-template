@@ -14,7 +14,7 @@ vi.mock('@/shared/lib', () => ({
   })
 }));
 
-describe('HomePage UI 전체 테스트', () => {
+describe('Home UI 전체 테스트', () => {
   let screen: ReturnType<typeof render>;
 
   beforeEach(() => {

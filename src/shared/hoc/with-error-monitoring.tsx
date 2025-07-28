@@ -1,5 +1,5 @@
 import type { ComponentType } from "react";
-import { initSentry } from "@/shared/lib";
+import { initSentry } from "@/shared/sentry";
 
 export const withErrorMonitoring = <P extends object>(
     Component: ComponentType<P>,
